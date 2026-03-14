@@ -1,4 +1,4 @@
-package com.ud.parcial1componentes
+package com.ud.parcial1componentes.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
