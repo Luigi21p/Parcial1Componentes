@@ -12,11 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Parcial1Componentes">
         <activity
-<<<<<<< HEAD
             android:name=".view.MainActivity"
-=======
-            android:name=".HomeActivity"
->>>>>>> main
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Parcial1Componentes">
