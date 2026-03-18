@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -31,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -42,6 +44,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+private val AzulMedio = Color(0xFF1B3A5C)
 // Esta pantalla permite modificar una reserva existente
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,9 +57,7 @@ fun EditarReservaScreen(
     val dbHelper = DatabaseHelper(context)
     val reservaDAO = ReservaDAO(dbHelper)
 
-    // ============================================
     // VARIABLES DE ESTADO
-    // ============================================
     var fecha by remember { mutableStateOf("") }
     var hora by remember { mutableStateOf("") }
     var pista by remember { mutableStateOf("1") }
@@ -75,9 +76,7 @@ fun EditarReservaScreen(
     val datePickerState = rememberDatePickerState()
     val timePickerState = rememberTimePickerState()
 
-    // ============================================
     // CARGA DE DATOS
-    // ============================================
     LaunchedEffect(Unit) {
         val reservas = reservaDAO.obtenerTodasLasReservas()
         val reserva = reservas.find { it.id == reservaId }
@@ -102,9 +101,7 @@ fun EditarReservaScreen(
         }
     }
 
-    // ============================================
-    // DIÁLOGO DEL CALENDARIO (CORREGIDO)
-    // ============================================
+    // DIÁLOGO DEL CALENDARIO
     if (mostrarCalendario) {
         DatePickerDialog(
             onDismissRequest = { mostrarCalendario = false },
@@ -113,28 +110,28 @@ fun EditarReservaScreen(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { fechaSeleccionada ->
 
-                            // PASO 1: Obtener la fecha en UTC del DatePicker
+                            // Obtener la fecha en UTC del DatePicker
                             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                             sdf.timeZone = TimeZone.getTimeZone("UTC")
                             val fechaUTC = sdf.format(Date(fechaSeleccionada))
 
-                            // PASO 2: Convertir a zona local del dispositivo
+                            // Convertir a zona local del dispositivo
                             val sdfLocal = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                             sdfLocal.timeZone = TimeZone.getDefault()
                             val fechaLocal = sdfLocal.parse(fechaUTC)
 
-                            // PASO 3: Usar Calendar con la fecha local
+                            // Usar Calendar con la fecha local
                             val cal = Calendar.getInstance()
                             cal.time = fechaLocal
 
-                            // PASO 4: Obtener fecha actual (local)
+                            // Obtener fecha actual (local)
                             val calHoy = Calendar.getInstance()
                             calHoy.set(Calendar.HOUR_OF_DAY, 0)
                             calHoy.set(Calendar.MINUTE, 0)
                             calHoy.set(Calendar.SECOND, 0)
                             calHoy.set(Calendar.MILLISECOND, 0)
 
-                            // PASO 5: Comparar fechas locales
+                            // Comparar fechas locales
                             if (cal.timeInMillis >= calHoy.timeInMillis) {
                                 fecha = String.format("%02d/%02d/%d",
                                     cal.get(Calendar.DAY_OF_MONTH),
@@ -151,12 +148,12 @@ fun EditarReservaScreen(
                     },
                     enabled = datePickerState.selectedDateMillis != null
                 ) {
-                    Text("OK")
+                    Text("OK", color = AzulMedio)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { mostrarCalendario = false }) {
-                    Text("Cancelar")
+                    Text("Cancelar", color = AzulMedio)
                 }
             }
         ) {
@@ -164,9 +161,7 @@ fun EditarReservaScreen(
         }
     }
 
-    // ============================================
     // DIÁLOGO DEL RELOJ
-    // ============================================
     if (mostrarReloj) {
         AlertDialog(
             onDismissRequest = { mostrarReloj = false },
@@ -213,21 +208,19 @@ fun EditarReservaScreen(
                         mostrarReloj = false
                     }
                 ) {
-                    Text("OK")
+                    Text("OK", color = AzulMedio)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { mostrarReloj = false }) {
-                    Text("Cancelar")
+                    Text("Cancelar", color = AzulMedio)
                 }
             },
             text = { TimePicker(state = timePickerState) }
         )
     }
 
-    // ============================================
     // DIÁLOGO DE MENSAJES
-    // ============================================
     if (mostrarMensaje) {
         AlertDialog(
             onDismissRequest = {
@@ -241,15 +234,13 @@ fun EditarReservaScreen(
                     mostrarMensaje = false
                     if (esExito) navController.popBackStack()
                 }) {
-                    Text("OK")
+                    Text("OK", color = AzulMedio)
                 }
             }
         )
     }
 
-    // ============================================
     // ESTRUCTURA PRINCIPAL
-    // ============================================
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Editar Reserva") })
@@ -268,7 +259,14 @@ fun EditarReservaScreen(
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = {
-                    TextButton(onClick = { mostrarCalendario = true }) { Text("📅") }
+                    TextButton(
+                        onClick = { mostrarCalendario = true },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = AzulMedio
+                        )
+                    ) {
+                        Text("📅")
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -279,7 +277,14 @@ fun EditarReservaScreen(
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = {
-                    TextButton(onClick = { mostrarReloj = true }) { Text("🕐") }
+                    TextButton(
+                        onClick = { mostrarReloj = true },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = AzulMedio
+                        )
+                    ) {
+                        Text("🕐")
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -420,14 +425,21 @@ fun EditarReservaScreen(
                             mostrarMensaje = true
                         }
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AzulMedio
+                    )
                 ) {
                     Text("Actualizar")
                 }
-
                 OutlinedButton(
-                    onClick = { navController.popBackStack() },
-                    modifier = Modifier.weight(1f)
+                    onClick = {
+                        navController.popBackStack()
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = AzulMedio
+                    )
                 ) {
                     Text("Cancelar")
                 }

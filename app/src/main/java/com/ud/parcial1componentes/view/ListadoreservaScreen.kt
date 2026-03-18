@@ -1,6 +1,7 @@
 package com.ud.parcial1componentes.view
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,18 +11,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +51,16 @@ import androidx.navigation.NavController
 import com.ud.parcial1componentes.logica.Reserva
 import com.ud.parcial1componentes.persistencia.DatabaseHelper
 import com.ud.parcial1componentes.persistencia.ReservaDAO
+
+// Colores del tema
+private val AzulOscuro = Color(0xFF0D1B2A)
+private val AzulMedio = Color(0xFF1B3A5C)
+private val AzulAcento = Color(0xFF2196F3)
+private val Verde = Color(0xFF4CAF50)
+private val Rojo = Color(0xFFE53935)
+private val Naranja = Color(0xFFFF9800)
+private val BlancoSuave = Color(0xFFF0F4F8)
+private val GrisTarjeta = Color(0xFF1E2D3D)
 
 // muestra todas las reservas en una tabla
 // Permite buscar, editar y eliminar reservas
@@ -88,8 +110,19 @@ fun ListadoReservasScreen(navController: NavController) {
     if (mostrarDialogoEliminar && reservaAEliminar != null) {
         AlertDialog(
             onDismissRequest = { mostrarDialogoEliminar = false },
-            title = { Text("Confirmar eliminación") },
-            text = { Text("¿Estás seguro de eliminar la reserva de ${reservaAEliminar!!.clienteCompleto}?") },
+            title = {
+                Text(
+                    "Confirmar eliminación",
+                    color = BlancoSuave,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    "¿Estás seguro de eliminar la reserva de ${reservaAEliminar!!.clienteCompleto}?",
+                    color = BlancoSuave.copy(alpha = 0.8f)
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -104,14 +137,17 @@ fun ListadoReservasScreen(navController: NavController) {
                         recargarReservas()
                     }
                 ) {
-                    Text("Eliminar", color = Color.Red)
+                    Text("Eliminar", color = Rojo)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { mostrarDialogoEliminar = false }) {
-                    Text("Cancelar")
+                    Text("Cancelar", color = AzulAcento)
                 }
-            }
+            },
+            containerColor = GrisTarjeta,
+            titleContentColor = BlancoSuave,
+            textContentColor = BlancoSuave
         )
     }
 
@@ -119,20 +155,34 @@ fun ListadoReservasScreen(navController: NavController) {
     // ESTRUCTURA PRINCIPAL DE LA PANTALLA
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Listado de Reservas") })
+            TopAppBar(
+                title = {
+                    Text(
+                        "Listado de Reservas",
+                        fontWeight = FontWeight.Bold,
+                        color = BlancoSuave
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = AzulOscuro
+                )
+            )
         },
         floatingActionButton = {
             // Botón flotante para crear nueva reserva
             FloatingActionButton(
-                onClick = { navController.navigate("crear") }
+                onClick = { navController.navigate("crear") },
+                containerColor = AzulAcento,
+                contentColor = BlancoSuave
             ) {
-                Text("+")  // Símbolo de agregar
+                Text("+", fontSize = 24.sp)  // Símbolo de agregar
             }
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(AzulOscuro)
                 .padding(padding)
                 .padding(12.dp)
         ) {
@@ -141,132 +191,173 @@ fun ListadoReservasScreen(navController: NavController) {
             OutlinedTextField(
                 value = busqueda,
                 onValueChange = { busqueda = it },  // Cada letra actualiza la búsqueda
-                placeholder = { Text("Buscar reserva...") },
+                placeholder = {
+                    Text(
+                        "Buscar reserva por nombre del cliente...",
+                        color = BlancoSuave.copy(alpha = 0.5f),
+                        fontSize = 14.sp
+                    )
+                },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = AzulAcento,
+                    unfocusedBorderColor = AzulMedio,
+                    focusedTextColor = BlancoSuave,
+                    unfocusedTextColor = BlancoSuave,
+                    cursorColor = AzulAcento,
+                    focusedPlaceholderColor = BlancoSuave.copy(alpha = 0.5f),
+                    unfocusedPlaceholderColor = BlancoSuave.copy(alpha = 0.5f)
+                ),
+                shape = RoundedCornerShape(12.dp)
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // ENCABEZADO DE LA TABLA (títulos de columnas)
+            Text(
+                text = "Reservas encontradas: ${reservas.size}",
+                color = BlancoSuave.copy(alpha = 0.7f),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF1565C0))  // Azul oscuro
-                    .padding(vertical = 6.dp, horizontal = 4.dp)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // LISTA DE RESERVAS en formato vertical
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                // Cada columna tiene un "weight" que determina su ancho
-                Text("Cliente", color = Color.White, fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1.5f), fontSize = 12.sp)
-                Text("Fecha", color = Color.White, fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1.5f), fontSize = 12.sp)
-                Text("Hora", color = Color.White, fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1.2f), fontSize = 12.sp)
-                Text("Pista", color = Color.White, fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(0.8f), fontSize = 12.sp)
-                Text("Estado", color = Color.White, fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1.3f), fontSize = 12.sp)
-                Text("Acc.", color = Color.White, fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(0.8f), fontSize = 12.sp)
+                items(reservas) { reserva ->
+                    TarjetaReservaCompacta(
+                        reserva = reserva,
+                        onEditar = {
+                            navController.navigate("editar/${reserva.id}")
+                        },
+                        onEliminar = {
+                            reservaAEliminar = reserva
+                            mostrarDialogoEliminar = true
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TarjetaReservaCompacta(
+    reserva: Reserva,
+    onEditar: () -> Unit,
+    onEliminar: () -> Unit
+) {
+    val colorEstado = when (reserva.estadoId) {
+        1 -> Verde
+        2 -> Rojo
+        else -> Naranja
+    }
+
+    // Formatear fecha
+    val fechaFormateada = try {
+        val partes = reserva.fecha.split("-")
+        "${partes[2]}/${partes[1]}/${partes[0]}"
+    } catch (e: Exception) {
+        reserva.fecha
+    }
+
+    // Formatear hora
+    val horaFormateada = try {
+        val partes = reserva.hora.split(":")
+        val hora = partes[0].toInt()
+        val minutos = partes[1]
+        val ampm = if (hora < 12) "AM" else "PM"
+        val h12 = if (hora % 12 == 0) 12 else hora % 12
+        "${h12}:${minutos} $ampm"
+    } catch (e: Exception) {
+        reserva.hora
+    }
+
+    val numeroPista = reserva.pistaNombre.replace("Pista ", "")
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = GrisTarjeta)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Información principal
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                // Nombre del cliente
+                Text(
+                    text = reserva.clienteCompleto,
+                    color = BlancoSuave,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1
+                )
+
+                // Fecha, hora y pista en una línea
+                Text(
+                    text = "$fechaFormateada · $horaFormateada · Pista $numeroPista",
+                    color = BlancoSuave.copy(alpha = 0.6f),
+                    fontSize = 11.sp,
+                    maxLines = 1
+                )
             }
 
-            // LISTA DE RESERVAS (una fila por cada reserva)
+            // Estado (como un punto de color)
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(colorEstado)
+                    .padding(end = 4.dp)
+            )
 
-            LazyColumn {
-                items(reservas) { reserva ->
-                    // FILA DE RESERVA
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp, horizontal = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Botones de acción (solo iconos)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                // Botón Editar
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(AzulMedio),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TextButton(
+                        onClick = onEditar,
+                        contentPadding = PaddingValues(0.dp),
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        // COLUMNA 1: Cliente (nombre completo)
-                        Text(
-                            reserva.clienteCompleto,
-                            modifier = Modifier.weight(1.5f),
-                            fontSize = 12.sp
-                        )
-
-                        // COLUMNA 2: Fecha (convertir YYYY-MM-DD a DD/MM/AAAA)
-                        val fechaFormateada = try {
-                            val partes = reserva.fecha.split("-")
-                            "${partes[2]}/${partes[1]}/${partes[0]}"
-                        } catch (e: Exception) {
-                            reserva.fecha  // Si hay error, mostrar original
-                        }
-                        Text(fechaFormateada, modifier = Modifier.weight(1.5f), fontSize = 12.sp)
-
-                        // COLUMNA 3: Hora (convertir 24h a 12h AM/PM)
-                        val horaFormateada = try {
-                            val partes = reserva.hora.split(":")
-                            val hora = partes[0].toInt()
-                            val minutos = partes[1]
-                            val ampm = if (hora < 12) "AM" else "PM"
-                            val h12 = if (hora % 12 == 0) 12 else hora % 12
-                            "${h12}:${minutos} $ampm"
-                        } catch (e: Exception) {
-                            reserva.hora
-                        }
-                        Text(horaFormateada, modifier = Modifier.weight(1.2f), fontSize = 12.sp)
-
-                        // COLUMNA 4: Pista (número)
-                        val numeroPista = reserva.pistaNombre.replace("Pista ", "")
-                        Text(numeroPista, modifier = Modifier.weight(0.8f), fontSize = 12.sp)
-
-                        // COLUMNA 5: Estado (con color de fondo)
-                        Box(modifier = Modifier.weight(1.3f)) {
-                            Text(
-                                text = reserva.estadoNombre,
-                                color = Color.White,
-                                fontSize = 11.sp,
-                                modifier = Modifier
-                                    .background(
-                                        when (reserva.estadoNombre) {
-                                            "Activa" -> Color(0xFF4CAF50)      // Verde
-                                            "Cancelada" -> Color(0xFFF44336)   // Rojo
-                                            "Completada" -> Color(0xFF9E9E9E)  // Gris
-                                            else -> Color(0xFF9E9E9E)
-                                        },
-                                        shape = MaterialTheme.shapes.small
-                                    )
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
-
-                        // COLUMNA 6: Botones de acción (Editar y Eliminar)
-
-                        // Botón Editar (✏️)
-                        Box(modifier = Modifier.weight(0.8f)) {
-                            TextButton(
-                                onClick = {
-                                    // Navegar a la pantalla de editar con el ID
-                                    navController.navigate("editar/${reserva.id}")
-                                },
-                                contentPadding = PaddingValues(0.dp)
-                            ) {
-                                Text("✏️", fontSize = 16.sp)
-                            }
-                        }
-
-                        // Botón Eliminar (🗑️)
-                        Box(modifier = Modifier.weight(0.8f)) {
-                            TextButton(
-                                onClick = {
-                                    // Guardar la reserva a eliminar y mostrar diálogo
-                                    reservaAEliminar = reserva
-                                    mostrarDialogoEliminar = true
-                                },
-                                contentPadding = PaddingValues(0.dp)
-                            ) {
-                                Text("🗑️", fontSize = 16.sp, color = Color.Red)
-                            }
-                        }
+                        Text("✏️", fontSize = 14.sp)
                     }
+                }
 
-                    // Línea divisoria entre reservas
-                    HorizontalDivider()
+                // Botón Eliminar
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(AzulMedio),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TextButton(
+                        onClick = onEliminar,
+                        contentPadding = PaddingValues(0.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text("🗑️", fontSize = 14.sp)
+                    }
                 }
             }
         }
